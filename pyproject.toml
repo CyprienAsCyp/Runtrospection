@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "runtrospection"
+version = "0.1.0"
+description = ""
+authors = ["Cyprien Calmels <cyprien.calmels@proton.me>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+loguru = "^0.7.2"
+streamlit = "^1.31.1"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.2"
+black = "^24.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
