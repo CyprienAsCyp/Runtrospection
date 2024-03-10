@@ -5,14 +5,17 @@ from loguru import logger
 import json
 import os
 from runtrospection.strava_app import StravaApp
+import streamlit as st
 
 
 @dataclass
 class Authenticator(StravaApp):
+    app: StravaApp = None
     scopes: str = "read,activity:read"
     authorization_code: str = ""
     refresh_token: str = ""
 
+    @st.cache_data
     def __post_init__(self):
         with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
             data = json.load(jsonFile)
@@ -20,7 +23,7 @@ class Authenticator(StravaApp):
         self.refresh_token = data["refresh_token"]
         if self.authorization_code != "":
             logger.info("Athlete already autorised Runtrosepction to access data!")
-            self.access_token = self.get_access_token()
+            self.app.access_token = self.get_access_token()
         else:
             self.open_authorization_window()
 
