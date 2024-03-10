@@ -5,23 +5,19 @@ import requests
 
 @dataclass
 class StravaApp:
+    access_token: str = ""
     client_id: str = "91201"
-    cient_secret: str = "e7cd3eb0483992f73d49dbb6941c4274e3309466"
-
-
-@dataclass
-class Runtrospection(StravaApp):
-    access_token: str
-
-    def __post_init__(self):
-        pass
+    client_secret: str = "e7cd3eb0483992f73d49dbb6941c4274e3309466"
 
     def get_activities_list(self) -> list[dict[str, str]]:
         start = int(datetime(2023, 1, 1, 0, 0).timestamp())
         end = int(datetime.now().timestamp())
-        url_activities = f"https://www.strava.com/api/v3/athlete/activities?before={end}&after={start}"
+        url_activities = f"https://www.strava.com/api/v3/athlete/activities"
+        params = {"before": end, "after": start, "page": 1, "per_page": 30}
         response = requests.get(
-            url_activities, headers={"Authorization": f"Bearer {self.access_token}"}
+            url_activities,
+            params=params,
+            headers={"Authorization": f"Bearer {self.access_token}"},
         )
         response.raise_for_status()
         return [
