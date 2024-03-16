@@ -15,7 +15,6 @@ class Authenticator(StravaApp):
     authorization_code: str = ""
     refresh_token: str = ""
 
-    @st.cache_data
     def __post_init__(self):
         with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
             data = json.load(jsonFile)
