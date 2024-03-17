@@ -3,13 +3,20 @@ from datetime import datetime
 import requests
 import polyline
 import streamlit as st
+import os
+from dotenv import load_dotenv
+
+if "CLIENT_SECRET" not in os.environ:
+    load_dotenv()
+
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
 
 @dataclass
 class StravaApp:
     access_token: str = ""
     client_id: str = "91201"
-    client_secret: str = "e7cd3eb0483992f73d49dbb6941c4274e3309466"
+    client_secret: str = CLIENT_SECRET
 
     def __post_init__(self):
         pass
