@@ -2,6 +2,7 @@ from runtrospection.authentication import Authenticator
 from runtrospection.strava_app import StravaApp
 from runtrospection.streamlit_app import StreamlitApp
 from runtrospection.runtrospection import Runtrospection
+from runtrospection.constants import DATABASE_FILENAME
 import streamlit as st
 import os
 import json
@@ -26,12 +27,12 @@ def main():
         )
         streamlit_app.build_map(df=df_map)
 
-        with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
+        with open(DATABASE_FILENAME, "r") as jsonFile:
             data = json.load(jsonFile)
             json_string = json.dumps(data)
             st.download_button(
                 label="Download your historical data",
-                file_name="input.json",
+                file_name=os.path.basename(DATABASE_FILENAME),
                 mime="application/json",
                 data=json_string,
             )
