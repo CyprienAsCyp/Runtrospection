@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import webbrowser
 from loguru import logger
 import json
-import os
 from runtrospection.strava_app import StravaApp
+from runtrospection.constants import URL_TOKEN, URL_AUTHORIZATION, DATABASE_FILENAME
 import streamlit as st
 
 
@@ -16,7 +16,7 @@ class Authenticator(StravaApp):
     refresh_token: str = ""
 
     def __post_init__(self):
-        with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
+        with open(DATABASE_FILENAME, "r") as jsonFile:
             data = json.load(jsonFile)
         self.authorization_code = data["authorization_code"]
         self.refresh_token = data["refresh_token"]
@@ -27,7 +27,7 @@ class Authenticator(StravaApp):
             self.open_authorization_window()
 
     def open_authorization_window(self) -> None:
-        url = f"http://www.strava.com/oauth/authorize?client_id={self.client_id}&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope={self.scopes}"
+        url = URL_AUTHORIZATION.format(client_id=self.client_id, scopes=self.scopes)
         webbrowser.open(url)
         logger.info(
             "You have to authorize Runtrospection to access your data. \
@@ -35,14 +35,14 @@ class Authenticator(StravaApp):
         )
 
     def update_value_in_json(self, key: str, value: str) -> None:
-        with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
+        with open(DATABASE_FILENAME, "r") as jsonFile:
             data = json.load(jsonFile)
         data[key] = value
-        with open(f"{os.getcwd()}/input.json", "w") as jsonFile:
+        with open(DATABASE_FILENAME, "w") as jsonFile:
             json.dump(data, jsonFile)
 
     def get_token(self, type: str) -> str:
-        url = "https://www.strava.com/oauth/token"
+        url = URL_TOKEN
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,

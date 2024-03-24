@@ -3,32 +3,35 @@ from datetime import datetime
 import requests
 import polyline
 import streamlit as st
-import os
 import pandas as pd
 import json
-
-if "CLIENT_SECRET" not in os.environ:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+from runtrospection.constants import (
+    CLIENT_SECRET,
+    CLIENT_ID,
+    URL_ACTIVITIES,
+    URL_LAPS,
+    URL_ACTIVITY,
+    DATETIME_FORMAT,
+    DEFAULT_START,
+    DEFAULT_END,
+    DATABASE_FILENAME,
+)
 
 
 @dataclass
 class StravaApp:
     access_token: str = ""
-    client_id: str = "91201"
+    client_id: str = CLIENT_ID
     client_secret: str = CLIENT_SECRET
 
     def __post_init__(self):
-        with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
+        with open(DATABASE_FILENAME, "r") as jsonFile:
             data = json.load(jsonFile)
             self.df_activities = pd.DataFrame(data=data["activities"])
 
     def get_new_activities_list(self) -> list[dict[str, str]]:
         start = self.compute_start_timestamp(df=self.df_activities)
-        end = int(datetime.now().timestamp())
+        end = int(DEFAULT_END)
         page = 1
         activities = []
         page_records = self.get_activities(start, end, page)
@@ -40,7 +43,7 @@ class StravaApp:
         return activities
 
     def get_activities(self, start: int, end: int, page: int):
-        url_activities = f"https://www.strava.com/api/v3/athlete/activities"
+        url_activities = URL_ACTIVITIES
         params = {"before": end, "after": start, "page": page, "per_page": 30}
         response = requests.get(
             url_activities,
@@ -54,14 +57,14 @@ class StravaApp:
         return (
             datetime.strptime(
                 df.sort_values("start_date", ascending=False)["start_date"].values[0],
-                "%Y-%m-%dT%H:%M:%SZ",
+                DATETIME_FORMAT,
             ).timestamp()
             if not df.empty
-            else int(datetime(2024, 3, 15, 0, 0).timestamp())
+            else int(DEFAULT_START)
         )
 
     def get_activity_laps(self, id: int):
-        url_activity = f"https://www.strava.com/api/v3/activities/{id}/laps"
+        url_activity = URL_LAPS.format(id=id)
         response = requests.get(
             url_activity, headers={"Authorization": f"Bearer {self.access_token}"}
         )
@@ -70,7 +73,7 @@ class StravaApp:
 
     @st.cache_data
     def get_raw_activity(self, id: int):
-        url_activity = f"https://www.strava.com/api/v3/activities/{id}"
+        url_activity = URL_ACTIVITY.format(id=id)
         response = requests.get(
             url_activity, headers={"Authorization": f"Bearer {self.access_token}"}
         )
@@ -86,7 +89,7 @@ class StravaApp:
     def populate_user_activities(self):
         new_activities = self.get_new_activities_list()
         my_bar = st.progress(0, text="Writing new activities to your database.")
-        with open(f"{os.getcwd()}/input.json", "r") as jsonFile:
+        with open(DATABASE_FILENAME, "r") as jsonFile:
             data = json.load(jsonFile)
 
         completed = 0
@@ -100,5 +103,5 @@ class StravaApp:
             completed += 1
         my_bar.empty()
         data["activities"] += new_data
-        with open(f"{os.getcwd()}/input.json", "w") as jsonFile:
+        with open(DATABASE_FILENAME, "w") as jsonFile:
             json.dump(data, jsonFile)
