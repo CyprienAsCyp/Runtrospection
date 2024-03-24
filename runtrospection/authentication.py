@@ -21,7 +21,9 @@ class Authenticator(StravaApp):
         self.authorization_code = data["authorization_code"]
         self.refresh_token = data["refresh_token"]
         if self.authorization_code != "":
-            logger.info("Athlete already autorised Runtrosepction to access data!")
+            text = "You already autorised Runtrosepction to access data!"
+            logger.info(text)
+            st.info(text)
             self.app.access_token = self.get_access_token()
         else:
             self.open_authorization_window()
@@ -29,10 +31,10 @@ class Authenticator(StravaApp):
     def open_authorization_window(self) -> None:
         url = URL_AUTHORIZATION.format(client_id=self.client_id, scopes=self.scopes)
         webbrowser.open(url)
-        logger.info(
-            "You have to authorize Runtrospection to access your data. \
+        text = "You have to authorize Runtrospection to access your data. \
                     Once you'll have paste the authorization code in 'input.json', save the file and rerun the program!"
-        )
+        logger.info(text)
+        st.info(text)
 
     def update_value_in_json(self, key: str, value: str) -> None:
         with open(DATABASE_FILENAME, "r") as jsonFile:
@@ -61,9 +63,9 @@ class Authenticator(StravaApp):
         try:
             return self.get_token(type="refresh_token")
         except requests.HTTPError:
-            logger.warning(
-                "It's the first time you are connecting, so you don't have any refresh token at the moment."
-            )
+            text = "It's the first time you are connecting, so you don't have any refresh token at the moment."
+            logger.warning(text)
+            st.warning(text)
             return self.get_token(type="authorization_code")
 
     def update_refresh_token(self, refresh_token: str) -> None:

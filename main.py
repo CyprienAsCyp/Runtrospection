@@ -14,7 +14,6 @@ def main():
     app = StravaApp()
     auth = Authenticator(app=app)
     rts = Runtrospection()
-    print(f"access token: {app.access_token}")
     app.populate_user_activities()
     activity_id = streamlit_app.enter_activity_id()
     if activity_id:
