@@ -20,5 +20,3 @@ DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 DEFAULT_START = datetime(2024, 3, 15, 0, 0).timestamp()
 DEFAULT_END = datetime.now().timestamp()
-
-DATABASE_FILENAME = f"{os.getcwd()}/input.json"

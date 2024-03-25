@@ -4,7 +4,7 @@ import webbrowser
 from loguru import logger
 import json
 from runtrospection.strava_app import StravaApp
-from runtrospection.constants import URL_TOKEN, URL_AUTHORIZATION, DATABASE_FILENAME
+from runtrospection.constants import URL_TOKEN, URL_AUTHORIZATION
 import streamlit as st
 
 
@@ -16,8 +16,8 @@ class Authenticator(StravaApp):
     refresh_token: str = ""
 
     def __post_init__(self):
-        with open(DATABASE_FILENAME, "r") as jsonFile:
-            data = json.load(jsonFile)
+        jsonFile = self.database_file.read()
+        data = json.load(jsonFile)
         self.authorization_code = data["authorization_code"]
         self.refresh_token = data["refresh_token"]
         if self.authorization_code != "":
@@ -37,11 +37,11 @@ class Authenticator(StravaApp):
         st.info(text)
 
     def update_value_in_json(self, key: str, value: str) -> None:
-        with open(DATABASE_FILENAME, "r") as jsonFile:
-            data = json.load(jsonFile)
+        jsonFile = self.database_file.read()
+        data = json.load(jsonFile)
         data[key] = value
-        with open(DATABASE_FILENAME, "w") as jsonFile:
-            json.dump(data, jsonFile)
+        jsonFile = self.database_file.write()
+        json.dump(data, jsonFile)
 
     def get_token(self, type: str) -> str:
         url = URL_TOKEN
