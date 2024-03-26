@@ -4,6 +4,8 @@ from runtrospection.streamlit_app import StreamlitApp
 from runtrospection.runtrospection import Runtrospection
 import streamlit as st
 import json
+import pandas as pd
+from io import StringIO
 
 # 10915836332
 
@@ -14,9 +16,10 @@ def main():
     )
     if uploaded_file is not None:
         st.write("Your database's filename:", uploaded_file.name)
+        data = json.loads(uploaded_file.getvalue())
 
         streamlit_app = StreamlitApp()
-        app = StravaApp(database_file=uploaded_file)
+        app = StravaApp(database_file=data)
         auth = Authenticator(app=app)
         rts = Runtrospection()
 
@@ -35,9 +38,7 @@ def main():
             )
             streamlit_app.build_map(df=df_map)
 
-            jsonFile = uploaded_file.read()
-            data = json.load(jsonFile)
-            json_string = json.dumps(data)
+            json_string = json.dumps(app.database_file)
             st.download_button(
                 label="Download your historical data",
                 file_name=uploaded_file.name,

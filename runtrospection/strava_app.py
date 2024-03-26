@@ -1,9 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 import requests
 import polyline
 import streamlit as st
-from io import BytesIO
+from typing import Any
 import pandas as pd
 import json
 from runtrospection.constants import (
@@ -20,15 +20,13 @@ from runtrospection.constants import (
 
 @dataclass
 class StravaApp:
-    database_file: BytesIO
+    database_file: Any = field(default_factory=dict)
     access_token: str = ""
     client_id: str = CLIENT_ID
     client_secret: str = CLIENT_SECRET
 
     def __post_init__(self):
-        jsonFile = self.database_file.read()
-        data = json.load(jsonFile)
-        self.df_activities = pd.DataFrame(data=data["activities"])
+        self.df_activities = pd.DataFrame(data=self.database_file["activities"])
 
     def get_new_activities_list(self) -> list[dict[str, str]]:
         start = self.compute_start_timestamp(df=self.df_activities)
@@ -90,8 +88,6 @@ class StravaApp:
     def populate_user_activities(self):
         new_activities = self.get_new_activities_list()
         my_bar = st.progress(0, text="Writing new activities to your database.")
-        jsonFile = self.database_file.read()
-        data = json.load(jsonFile)
 
         completed = 0
         new_data = []
@@ -103,6 +99,4 @@ class StravaApp:
             )
             completed += 1
         my_bar.empty()
-        data["activities"] += new_data
-        jsonFile = self.database_file.write()
-        json.dump(data, jsonFile)
+        self.database_file["activities"] += new_data

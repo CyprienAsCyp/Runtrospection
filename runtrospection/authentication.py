@@ -16,10 +16,8 @@ class Authenticator(StravaApp):
     refresh_token: str = ""
 
     def __post_init__(self):
-        jsonFile = self.database_file.read()
-        data = json.load(jsonFile)
-        self.authorization_code = data["authorization_code"]
-        self.refresh_token = data["refresh_token"]
+        self.authorization_code = self.app.database_file["authorization_code"]
+        self.refresh_token = self.app.database_file["refresh_token"]
         if self.authorization_code != "":
             text = "You already autorised Runtrosepction to access data!"
             logger.info(text)
@@ -37,11 +35,7 @@ class Authenticator(StravaApp):
         st.info(text)
 
     def update_value_in_json(self, key: str, value: str) -> None:
-        jsonFile = self.database_file.read()
-        data = json.load(jsonFile)
-        data[key] = value
-        jsonFile = self.database_file.write()
-        json.dump(data, jsonFile)
+        self.app.database_file[key] = value
 
     def get_token(self, type: str) -> str:
         url = URL_TOKEN
